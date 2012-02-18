@@ -2,13 +2,6 @@
 
 (cl:in-package :srfi-35.internal)
 
-#|(define-record-type :condition-type
-  (really-make-condition-type name supertype fields all-fields)
-  condition-type?
-  (name condition-type-name)
-  (supertype condition-type-supertype)
-  (fields condition-type-fields)
-  (all-fields condition-type-all-fields))|#
 
 #|(define-function (make-condition-type name supertype fields)
   (if (not (symbol? name))
@@ -28,39 +21,8 @@
                               (append (condition-type-all-fields supertype)
                                       fields)))|#
 
-
-
-#|(define-syntax define-condition-type
-  (syntax-rules ()
-    ((define-condition-type ?name ?supertype ?predicate
-       (?field1 ?accessor1) ***)
-     (begin
-       (define ?name
-         (make-condition-type '?name
-                              ?supertype
-                              '(?field1 ***)))
-       (define (?predicate thing)
-         (and (condition? thing)
-              (condition-has-type? thing ?name)))
-       (define (?accessor1 condition)
-         (condition-ref (extract-condition condition ?name)
-                        '?field1))
-       ***))))|#
-
-#|(define-syntax define-condition-type
-  (syntax-rules ()
-    ((define-condition-type ?name ?supertype ?predicate
-       (?field1 ?accessor1) ***)
-     (progn
-       (cl:define-condition ?name (?supertype)
-         ((?field1 :accessor ?accessor1 :initarg ?field1) ***))
-       (defconstant ?name (find-class '?name))
-       (defun ?predicate (thing)
-         (and (condition? thing)
-              (typep thing '?name)))))))|#
-
 (defmacro define-condition-type (name supertype predicate &body fields)
-  `(progn ;eval-when (:compile-toplevel :load-toplevel :execute)
+  `(progn
      (cl:define-condition ,name (,supertype)
        ,(mapcar (lambda (x)
                   (destructuring-bind (?field1 ?accessor1)
@@ -74,18 +36,8 @@
        (and (subtypep (class-of thing) 'cl:condition)
             (typep thing ',name) ))))
 
-#|(define-condition-type &foo cl:condition
-  foo?
-  (x cx) )|#
-
-#|(cx (make-condition &foo :x 8))|#
-
-#|(define (condition-subtype? subtype supertype)
-  (let recur ((subtype subtype))
-    (cond ((not subtype) #f)
-          ((eq? subtype supertype) #t)
-          (else
-           (recur (condition-type-supertype subtype))))))|#
+(defun condition-type? (cond)
+  (subtypep cond 'cl:condition))
 
 (defun condition-subtype? (subtype supertype)
   (subtypep subtype supertype))
@@ -100,25 +52,6 @@
 
 ; The type-field-alist is of the form
 ; ((<type> (<field-name> . <value>) ***) ***)
-#|(define-record-type :condition
-  (really-make-condition type-field-alist)
-  condition?
-  (type-field-alist condition-type-field-alist))|#
-
-#|(condition? (make-condition 'cl:condition))|#
-
-#|(define (make-condition type . field-plist)
-  (let ((alist (let label ((plist field-plist))
-                 (if (null? plist)
-                            '()
-                     (cons (cons (car plist)
-                                 (cadr plist))
-                           (label (cddr plist)))))))
-    (if (not (lset= eq?
-                    (condition-type-all-fields type)
-                    (map car alist)))
-        (error "condition fields don't match condition type"))
-    (really-make-condition (list (cons type alist)))))|#
 
 (define-function make-condition #'cl:make-condition)
 
@@ -126,10 +59,6 @@
   (any (lambda (has-type)
          (condition-subtype? has-type type))
        (condition-types condition)))|#
-
-#|(define (condition-ref condition field)
-  (type-field-alist-ref (condition-type-field-alist condition)
-                        field))|#
 
 (defun condition-ref (condition field)
   (slot-value condition field))
@@ -144,13 +73,19 @@
           (else
            (loop (cdr type-field-alist))))))|#
 
-
 #|
-pending
  (define (make-compound-condition condition-1 . conditions)
   (really-make-condition
    (apply append (map condition-type-field-alist
                       (cons condition-1 conditions)))))|#
+
+;;; FIXME
+(defun make-compound-condition (&rest conditions)
+  (let ((name (gensym)))
+    (eval
+     `(progn
+        (define-condition ,name (,@conditions) () )))
+    (find-class name)))
 
 #|(define (extract-condition condition type)
   (let ((entry (find (lambda (entry)
@@ -209,11 +144,6 @@ pending
                                    missing-field))))
                     (lset-difference eq? all-fields fields))
           (loop (cdr type-field-alist))))))|#
-
-#|(define &condition (really-make-condition-type '&condition
-                                               #f
-                                               '()
-                                               '()))|#
 
 (define-condition-type &condition cl:condition condition?)
 
