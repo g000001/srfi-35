@@ -79,13 +79,31 @@
    (apply append (map condition-type-field-alist
                       (cons condition-1 conditions)))))|#
 
-;;; FIXME
+(defun get-cond-slots (conditions)
+  (mapcar (lambda (c)
+            (cons c (mapcar #'c2mop:slot-definition-name
+                            (c2mop:class-slots (class-of c)))))
+          conditions))
+
+(defun ensure-cond-slots (conditions)
+  (remove-duplicates
+   (mapcan (lambda (x)
+             (mapcar (lambda (y)
+                       `(,y :initform ,(slot-value (car x) y)) )
+                     (cdr x) ))
+           (get-cond-slots conditions) )
+   :key #'car
+   :from-end T))
+
+;(ensure-cond-slots (list v1 v2))
+
 (defun make-compound-condition (&rest conditions)
-  (let ((name (gensym)))
+  (let ((name (gensym "ANONYMOUS-COMPOUND-CONDITION-")))
     (eval
      `(progn
-        (define-condition ,name (,@conditions) () )))
-    (find-class name)))
+        (define-condition ,name (,@(mapcar #'type-of conditions))
+          (,@(ensure-cond-slots conditions)) )))
+    (make-condition name)))
 
 #|(define (extract-condition condition type)
   (let ((entry (find (lambda (entry)
@@ -108,6 +126,20 @@
        (cons ?type1
              (list (cons '?field1 ?value1) ***))
        ***)))))|#
+
+(defmacro condition (&rest types-fields)
+  (let ((names (mapcar #'car types-fields))
+        (fields (mapcan (lambda (x)
+                          (mapcar (lambda (f)
+                                    `(,(nth 0 f) :initform ,(nth 1 f)))
+                                  (cdr x)))
+                        types-fields))
+        (tem (gensym "ANONYMOUS-CONDITION-")))
+    `(eval ; FIXME (SBCL: attempt to dump reference to obsolete class)
+      '(progn
+        (define-condition ,tem (,@names)
+          (,@fields))
+        (make-condition ',tem)))))
 
 #|(define (type-field-alist->condition type-field-alist)
   (really-make-condition
