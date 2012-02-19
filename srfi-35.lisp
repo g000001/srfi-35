@@ -53,7 +53,17 @@
 ; The type-field-alist is of the form
 ; ((<type> (<field-name> . <value>) ***) ***)
 
-(define-function make-condition #'cl:make-condition)
+#|(defun make-condition (type &rest args)
+  (apply #'cl:make-condition type args))|#
+
+(defun make-condition (type &rest args)
+  (cond ((eq type &message)
+         (apply #'cl:make-condition
+                (quote &message)
+                :format-control "~A"
+                :format-arguments (list (getf args :message))
+                args))
+        (T (apply #'cl:make-condition type args) )))
 
 #|(define (condition-has-type? condition type)
   (any (lambda (has-type)
@@ -89,7 +99,7 @@
   (remove-duplicates
    (mapcan (lambda (x)
              (mapcar (lambda (y)
-                       `(,y :initform ,(slot-value (car x) y)) )
+                       `(,y :initform (quote ,(slot-value (car x) y))) ) ;already evaled
                      (cdr x) ))
            (get-cond-slots conditions) )
    :key #'car
@@ -179,7 +189,7 @@
 
 (define-condition-type &condition cl:condition condition?)
 
-(define-condition-type &message &condition
+(define-condition-type &message cl:simple-condition
   message-condition?
   (message condition-message))
 
