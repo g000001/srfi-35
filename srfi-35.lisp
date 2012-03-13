@@ -33,8 +33,7 @@
                 fields ))
      (defparameter ,name (find-class ',name))
      (defun ,predicate (thing)
-       (and (subtypep (class-of thing) 'cl:condition)
-            (subtypep (class-of thing) ',name) ))))
+       (subtypep (class-of thing) ',name))))
 
 (defun condition-type? (cond)
   (subtypep cond 'cl:condition))
@@ -193,11 +192,13 @@
 
 (define-condition-type &condition cl:condition condition?)
 
+(define-condition-type &foo &condition foocond?)
+
 (define-condition-type &message cl:simple-condition
   message-condition?
   (message condition-message))
 
-(define-condition-type &serious cl:serious-condition
+(define-condition-type &serious &condition
   serious-condition?)
 
 (define-condition-type &error &serious
