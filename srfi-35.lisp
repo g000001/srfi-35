@@ -34,7 +34,7 @@
      (defparameter ,name (find-class ',name))
      (defun ,predicate (thing)
        (and (subtypep (class-of thing) 'cl:condition)
-            (typep thing ',name) ))))
+            (subtypep (class-of thing) ',name) ))))
 
 (defun condition-type? (cond)
   (subtypep cond 'cl:condition))
@@ -64,6 +64,10 @@
                 :format-arguments (list (getf args :message))
                 args))
         (T (apply #'cl:make-condition type args) )))
+
+(defun condition-has-type? (condition type)
+  (declare (ignore condition type))
+  'T)
 
 #|(define (condition-has-type? condition type)
   (any (lambda (has-type)
