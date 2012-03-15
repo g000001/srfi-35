@@ -5,6 +5,7 @@
 (defsystem :srfi-35
   :serial t
   :depends-on (:fiveam
+               :closer-mop
                :srfi-23
                :srfi-9
                :srfi-1
