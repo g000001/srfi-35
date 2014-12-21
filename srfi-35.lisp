@@ -102,7 +102,8 @@
   (remove-duplicates
    (mapcan (lambda (x)
              (mapcar (lambda (y)
-                       `(,y :initform (quote ,(slot-value (car x) y))) ) ;already evaled
+                       `(,y ,@(when (cl:slot-boundp (car x) y)
+                                `(:initform (quote ,(slot-value (car x) y))))) ) ;already evaled
                      (cdr x) ))
            (get-cond-slots conditions) )
    :key #'car
