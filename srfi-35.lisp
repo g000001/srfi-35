@@ -30,7 +30,7 @@
 ; ((<type> (<field-name> . <value>) ***) ***)
 
 (defun make-condition (type &rest args)
-  (cond ((eq type &message)
+  (cond ((eq type '&message)
          (apply #'cl:make-condition
                 (quote &message)
                 :format-control "~A"
