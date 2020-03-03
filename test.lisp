@@ -1,28 +1,42 @@
 (cl:in-package "https://github.com/g000001/srfi-35#internals")
 
+
 (def-suite* srfi-35)
 
+
 (define-condition-type &test-c &condition test-c?)
+
 
 (define-condition-type &c &condition
   c?
   (x c-x))
 
+
 (define-condition-type &c1 &c
   c1?
   (a c1-a))
+
 
 (define-condition-type &c2 &c
   c2?
   (b c2-b))
 
+
 (defvar v1 (make-condition &c1 :x "V1" :a "a1"))
 
+
 (defvar v2 (condition (&c2 (x "V2") (b "b2"))))
+
+
 (defvar v3 (condition (&c1 (x "V3/1") (a "a3"))
                       (&c2 (b "b3"))))
+
+
 (defvar v4 (make-compound-condition v1 v2))
+
+
 (defvar v5 (make-compound-condition v2 v3))
+
 
 (test make-condition
   (is-true (test-c? (make-condition &test-c)))
@@ -60,4 +74,7 @@
   (string= (c1-a v5) "a3")
   (string= (c2-b v5) "b2"))
 
+
 ;;; *EOF*
+
+

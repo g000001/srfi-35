@@ -203,11 +203,15 @@
 
 
 (declaim (inline vector-ref))
+
+
 (defun vector-ref (vec k)
   (cl:svref vec k))
 
 
 (declaim (inline modulo))
+
+
 (defun modulo (x y)
   (cl:mod x y))
 
@@ -217,6 +221,8 @@
 
 
 (declaim (inline make-vector))
+
+
 (defun make-vector (size &optional (init 0))
   (cl:make-array size                   ;***
                  :initial-element init
@@ -225,11 +231,15 @@
 
 
 (declaim (inline string-append))
+
+
 (defun string-append (&rest strings)
   (cl:format nil "~{~A~}" strings))
 
 
 (declaim (inline number->string))
+
+
 (defun number->string (num)
   (cl:write-to-string num))
 
@@ -292,6 +302,7 @@
 
 (defun eof-object? (obj)
   (eq obj +eof+))
+
 
 (defmacro iterate (tag specs &body body)
   (let ((vars  (mapcar #'car specs))
