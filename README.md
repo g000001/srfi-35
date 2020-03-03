@@ -1,4 +1,4 @@
-* SRFI 35: Conditions
+# SRFI 35 for CL: Conditions
 - Copyright (C) Richard Kelsey, Michael Sperber (2002). All Rights Reserved.
 
 Permission is hereby granted, free of charge, to any person obtaining

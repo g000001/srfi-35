@@ -1,6 +1,6 @@
 ;;;; srfi-35.lisp
 
-(cl:in-package :srfi-35.internal)
+(cl:in-package "https://github.com/g000001/srfi-35#internals")
 
 
 #|(define-function (make-condition-type name supertype fields)
@@ -35,11 +35,14 @@
      (defun ,predicate (thing)
        (subtypep (class-of thing) ',name))))
 
+
 (defun condition-type? (cond)
   (subtypep cond 'cl:condition))
 
+
 (defun condition-subtype? (subtype supertype)
   (subtypep subtype supertype))
+
 
 #|(define (condition-type-field-supertype condition-type field)
   (let loop ((condition-type condition-type))
@@ -64,9 +67,11 @@
                 args))
         (T (apply #'cl:make-condition type args) )))
 
+
 (defun condition-has-type? (condition type)
   (declare (ignore condition type))
   'T)
+
 
 #|(define (condition-has-type? condition type)
   (any (lambda (has-type)
@@ -75,6 +80,7 @@
 
 (defun condition-ref (condition field)
   (slot-value condition field))
+
 
 #|(define (type-field-alist-ref type-field-alist field)
   (let loop ((type-field-alist type-field-alist))
@@ -98,6 +104,7 @@
                             (c2mop:class-slots (class-of c)))))
           conditions))
 
+
 (defun ensure-cond-slots (conditions)
   (remove-duplicates
    (mapcan (lambda (x)
@@ -109,6 +116,7 @@
    :key #'car
    :from-end T))
 
+
 ;(ensure-cond-slots (list v1 v2))
 
 (defun make-compound-condition (&rest conditions)
@@ -118,6 +126,7 @@
         (define-condition ,name (,@(mapcar #'type-of conditions))
           (,@(ensure-cond-slots conditions)) )))
     (make-condition name)))
+
 
 #|(define (extract-condition condition type)
   (let ((entry (find (lambda (entry)
@@ -154,6 +163,7 @@
         (define-condition ,tem (,@names)
           (,@fields))
         (make-condition ',tem)))))
+
 
 #|(define (type-field-alist->condition type-field-alist)
   (really-make-condition
@@ -193,16 +203,21 @@
 
 (define-condition-type &condition cl:condition condition?)
 
+
 (define-condition-type &foo &condition foocond?)
+
 
 (define-condition-type &message cl:simple-condition
   message-condition?
   (message condition-message))
 
+
 (define-condition-type &serious &condition
   serious-condition?)
+
 
 (define-condition-type &error &serious
   error?)
 
-;;; eof
+
+;;; *EOF*

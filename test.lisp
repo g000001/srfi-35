@@ -1,9 +1,6 @@
-(cl:in-package :srfi-35.internal)
-;; (in-readtable :srfi-35)
+(cl:in-package "https://github.com/g000001/srfi-35#internals")
 
-(def-suite srfi-35)
-
-(in-suite srfi-35)
+(def-suite* srfi-35)
 
 (define-condition-type &test-c &condition test-c?)
 
@@ -63,4 +60,4 @@
   (string= (c1-a v5) "a3")
   (string= (c2-b v5) "b2"))
 
-;;; eof
+;;; *EOF*
